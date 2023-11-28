@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <qbrush.h>
 #include <qcolor.h>
+#include <qdebug.h>
 #include <qnamespace.h>
 #include <qobjectdefs.h>
 #include <qpen.h>
@@ -19,8 +20,10 @@ TimerCircle::TimerCircle(QWidget *parent) : QWidget{parent} {
     connect(mTimer, SIGNAL(timeout()), this, SLOT(updateTimer()));
     mTimer->start(kFreshRateInterval);
     setMinimumSize(330, 330);
-    resize(315, 315);
+    resize(400, 400);
     mTimerRadius = 300;
+    mCurrentState = WORK;
+    currentMax = kMaxWorkSeconds;
 }
 
 void TimerCircle::paintEvent(QPaintEvent *) {
@@ -54,6 +57,7 @@ void TimerCircle::paintText() {
 void TimerCircle::resizeEvent(QResizeEvent *event) {
     qDebug() << "sjiot";
     mTimerRadius = std::min(event->size().height(), event->size().width()) - 30;
+    qDebug() << mTimerRadius;
 }
 
 void TimerCircle::paintCircle(int maxTime) {
@@ -75,15 +79,8 @@ void TimerCircle::paintCircle(int maxTime) {
 }
 
 void TimerCircle::updateTimer() {
-    update();
     mPassedTime += kFreshRateInterval;
-    switch (mCurrentState) {
-        case BREAK:
-            currentMax = kMaxBreakSeconds;
-            break;
-        default:
-            currentMax = kMaxWorkSeconds;
-    }
+    update();
     if (mPassedTime >= currentMax) {
         mPassedTime -= currentMax;
         switch (mCurrentState) {
@@ -92,6 +89,13 @@ void TimerCircle::updateTimer() {
                 break;
             default:
                 mCurrentState = BREAK;
+        }
+        switch (mCurrentState) {
+            case BREAK:
+                currentMax = kMaxBreakSeconds;
+                break;
+            default:
+                currentMax = kMaxWorkSeconds;
         }
     }
 }

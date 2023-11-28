@@ -24,9 +24,10 @@ void Dialog::initHorizontalBox() {
     mPauseButton = new QPushButton(tr("pause"));
 
     mTimercircle = new TimerCircle();
+    mTimercircle->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     verticalLayout->addWidget(mTimercircle, 1, Qt::AlignCenter);
     verticalLayout->addWidget(mPauseButton);
     mHorizentalLayout->setLayout(verticalLayout);
 }
 
-//virtual Dialog::~Dialog(){}
+// virtual Dialog::~Dialog(){}

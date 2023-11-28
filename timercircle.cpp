@@ -1,6 +1,5 @@
 #include "timercircle.h"
-#include <QPainter>
-#include <algorithm>
+
 #include <qbrush.h>
 #include <qcolor.h>
 #include <qdebug.h>
@@ -9,11 +8,12 @@
 #include <qpen.h>
 #include <qtimer.h>
 #include <qwidget.h>
-#include <setjmp.h>
-#include <string>
-#include "iostream"
-#include <QResizeEvent>
+
 #include <QDebug>
+#include <QPainter>
+#include <QResizeEvent>
+#include <algorithm>
+#include <string>
 
 TimerCircle::TimerCircle(QWidget *parent) : QWidget{parent} {
     mTimer = new QTimer();
@@ -23,13 +23,15 @@ TimerCircle::TimerCircle(QWidget *parent) : QWidget{parent} {
     resize(400, 400);
     mTimerRadius = 300;
     mCurrentState = WORK;
-    currentMax = kMaxWorkSeconds;
+    mCurrentMax = kMaxWorkSeconds;
+    mCurrentConcentrateCounter = 1;
+    mTotalConcentrateCounter = 0;
 }
 
 void TimerCircle::paintEvent(QPaintEvent *) {
     mPaint = new QPainter;
     mPaint->begin(this);
-    paintCircle(currentMax);
+    paintCircle(mCurrentMax);
     paintText();
     mPaint->end();
 }
@@ -38,7 +40,7 @@ void TimerCircle::paintText() {
     QFont font("Consolas", 60);
     mPaint->setFont(font);
     mPaint->setPen(QColor(80, 81, 84));
-    int remainTime = (currentMax - mPassedTime) / 1000;
+    int remainTime = (mCurrentMax - mPassedTime) / 1000;
     int minite = remainTime / 60;
     int second = remainTime % 60;
 
@@ -81,22 +83,39 @@ void TimerCircle::paintCircle(int maxTime) {
 void TimerCircle::updateTimer() {
     mPassedTime += kFreshRateInterval;
     update();
-    if (mPassedTime >= currentMax) {
-        mPassedTime -= currentMax;
+    if (mPassedTime >= mCurrentMax) {
+        mPassedTime -= mCurrentMax;
         switch (mCurrentState) {
+            case LONG_BREAK:
+                mCurrentConcentrateCounter = 0;
             case BREAK:
+                mCurrentConcentrateCounter++;
                 mCurrentState = WORK;
                 break;
             default:
-                mCurrentState = BREAK;
+                mTotalConcentrateCounter++;
+                
+                if (mCurrentConcentrateCounter == 4) {
+                    mCurrentState = LONG_BREAK;
+                } else {
+                    mCurrentState = BREAK;
+                }
         }
         switch (mCurrentState) {
             case BREAK:
-                currentMax = kMaxBreakSeconds;
+                mCurrentMax = kMaxBreakSeconds;
+                break;
+            case LONG_BREAK:
+                mCurrentMax = kMaxLongBreakSeconds;
                 break;
             default:
-                currentMax = kMaxWorkSeconds;
+                mCurrentMax = kMaxWorkSeconds;
         }
+        qDebug() << "Current state is:" << mCurrentState;
+        qDebug() << "Current counter is:" << mCurrentConcentrateCounter;
+        qDebug() << "Current total counter is:" << mTotalConcentrateCounter;
+        emit setTimerInfomation(mCurrentState, mTotalConcentrateCounter,
+                            mCurrentConcentrateCounter);
     }
 }
 
@@ -111,4 +130,19 @@ void TimerCircle::pauseTimer() {
             mLastState = mCurrentState;
             mCurrentState = PAUSE;
     }
+    emit setTimerInfomation(mCurrentState, mTotalConcentrateCounter,
+                            mCurrentConcentrateCounter);
+}
+
+void TimerCircle::resetTimer() {
+    mPassedTime = 0;
+    if (mCurrentState != PAUSE) pauseTimer();
+    update();
+}
+
+void TimerCircle::skipTimer() {
+    mPassedTime = mCurrentMax - kFreshRateInterval;
+    updateTimer();
+    pauseTimer();
+    if (mCurrentState == PAUSE) pauseTimer();
 }

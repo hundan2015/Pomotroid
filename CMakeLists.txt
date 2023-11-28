@@ -15,8 +15,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
         main.cpp
         dialog.cpp
-timercircle.cpp
-
+        timercircle.cpp
+        timerstatelabel.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -25,6 +25,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         dialog.h dialog.cpp
         timercircle.h timercircle.cpp
+        timerstatelabel.h timerstatelabel.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Pomotroid APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

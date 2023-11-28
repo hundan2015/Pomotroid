@@ -16,6 +16,7 @@ class Dialog : public QDialog {
     QPushButton* mPauseButton;
     TimerCircle* mTimercircle;
     Dialog();
+    virtual ~Dialog(){}
     void initHorizontalBox();
     //void resizeEvent(QResizeEvent*);
 };

@@ -28,3 +28,5 @@ void Dialog::initHorizontalBox() {
     verticalLayout->addWidget(mPauseButton);
     mHorizentalLayout->setLayout(verticalLayout);
 }
+
+//virtual Dialog::~Dialog(){}

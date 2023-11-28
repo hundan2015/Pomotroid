@@ -26,7 +26,7 @@ class TimerCircle : public QWidget {
     int currentMax;
     const int kMaxWorkSeconds = 1000 * 60 * 1;
     const int kMaxBreakSeconds = 1000 * 60 * 5;
-    const int kFreshRateInterval = 1000 / 25;
+    const int kFreshRateInterval = 1000 / 2;
     float mPassedTime = 0;
     // Resize part;
     int mTimerRadius;

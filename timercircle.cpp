@@ -94,7 +94,7 @@ void TimerCircle::updateTimer() {
                 break;
             default:
                 mTotalConcentrateCounter++;
-                
+
                 if (mCurrentConcentrateCounter == 4) {
                     mCurrentState = LONG_BREAK;
                 } else {
@@ -115,7 +115,7 @@ void TimerCircle::updateTimer() {
         qDebug() << "Current counter is:" << mCurrentConcentrateCounter;
         qDebug() << "Current total counter is:" << mTotalConcentrateCounter;
         emit setTimerInfomation(mCurrentState, mTotalConcentrateCounter,
-                            mCurrentConcentrateCounter);
+                                mCurrentConcentrateCounter);
     }
 }
 
@@ -142,7 +142,14 @@ void TimerCircle::resetTimer() {
 
 void TimerCircle::skipTimer() {
     mPassedTime = mCurrentMax - kFreshRateInterval;
+    TIMER_STATE temp = mCurrentState;
+    if (temp == PAUSE) {
+        pauseTimer();
+    }
+    mTimer->stop();
     updateTimer();
-    pauseTimer();
-    if (mCurrentState == PAUSE) pauseTimer();
+    if (temp == PAUSE) {
+        pauseTimer();
+    } else
+        mTimer->start(kFreshRateInterval);
 }
